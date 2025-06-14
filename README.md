@@ -5,10 +5,12 @@ A beautiful, minimal, and fully functional Weather App built with **HTML**, **CS
 ## 🔥 Live Preview
 
 ### 🔍 Search Screen
-![Search View](./preview-default.png)
+![Screenshot 2025-06-15 013708](https://github.com/user-attachments/assets/7a7273a9-f0a6-4925-b734-a459657b2eeb)
+
 
 ### 🌤️ Weather Info Display
-![Weather Info View](./preview-weather.png)
+![Screenshot 2025-06-15 011410](https://github.com/user-attachments/assets/3be4ca6b-69b2-4b21-aa43-8132041fb077)
+
 
 ---
 
