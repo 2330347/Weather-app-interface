@@ -1,27 +1,83 @@
+// ===== DOM ELEMENTS =====
 const cityInput = document.querySelector('.city-input')
 const searchBtn = document.querySelector('.search-btn')
-
-const weatherInfoSection = document.querySelector('.weather-info')
-const notFoundSection = document.querySelector('.not-found')
-const searchCitySection = document.querySelector('.search-city')
-
-const countryTxt = document.querySelector('.country-txt')
-const tempTxt = document.querySelector('.temp-txt')
-const conditionTxt = document.querySelector('.condition-txt')
-const humidityValueTxt = document.querySelector('.humidity-value-txt')
-const windValueTxt = document.querySelector('.wind-value-txt')
-const weatherSummaryImg = document.querySelector('.weather-summary-img')
-const currentDateTxt = document.querySelector('.current-date-txt')
-
-const forecastItemsContainers = document.querySelector('.forecast-items-containers')
+const weatherInfoSection = document.querySelector('#weatherInfo')
+const notFoundSection = document.querySelector('#notFoundSection')
+const searchCitySection = document.querySelector('#searchCitySection')
+const countryTxt = document.querySelector('#countryTxt')
+const tempTxt = document.querySelector('#tempTxt')
+const conditionTxt = document.querySelector('#conditionTxt')
+const humidityValueTxt = document.querySelector('#humidityValueTxt')
+const windValueTxt = document.querySelector('#windValueTxt')
+const feelsLikeValueTxt = document.querySelector('#feelsLikeValueTxt')
+const pressureValueTxt = document.querySelector('#pressureValueTxt')
+const weatherSummaryImg = document.querySelector('#weatherSummaryImg')
+const currentDateTxt = document.querySelector('#currentDateTxt')
+const forecastItemsContainer = document.querySelector('#forecastItemsContainer')
+const mainContainer = document.querySelector('#mainContainer')
 
 const apiKey = 'c63c398699d8b78634249ca219532690'
 
-// Show search section by default
-showDisplaySection(searchCitySection)
+// ===== PARTICLE SYSTEM =====
+function createParticles() {
+    const container = document.getElementById('bgParticles')
+    for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div')
+        particle.classList.add('particle')
+        const size = Math.random() * 4 + 1
+        particle.style.width = size + 'px'
+        particle.style.height = size + 'px'
+        particle.style.left = Math.random() * 100 + '%'
+        particle.style.animationDuration = (Math.random() * 15 + 10) + 's'
+        particle.style.animationDelay = (Math.random() * 10) + 's'
+        particle.style.opacity = Math.random() * 0.5 + 0.1
+        container.appendChild(particle)
+    }
+}
+createParticles()
 
+// ===== THEME SYSTEM =====
+const themeToggle = document.getElementById('themeToggle')
+const themeIcon = document.getElementById('themeIcon')
+
+function getSystemTheme() {
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+}
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme)
+    themeIcon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode'
+}
+
+// Initialize: check saved preference, else follow system
+const savedTheme = localStorage.getItem('skyview-theme')
+if (savedTheme) {
+    applyTheme(savedTheme)
+} else {
+    applyTheme(getSystemTheme())
+}
+
+// Listen for system theme changes (when no manual override)
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('skyview-theme')) {
+        applyTheme(e.matches ? 'light' : 'dark')
+    }
+})
+
+// Manual toggle
+themeToggle.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') || getSystemTheme()
+    const next = current === 'dark' ? 'light' : 'dark'
+    applyTheme(next)
+    localStorage.setItem('skyview-theme', next)
+    // Animate the icon
+    themeIcon.style.transform = 'rotate(360deg) scale(0)'
+    setTimeout(() => { themeIcon.style.transform = 'rotate(0deg) scale(1)' }, 200)
+})
+
+// ===== EVENT LISTENERS =====
 searchBtn.addEventListener('click', () => {
-    if (cityInput.value.trim() != '') {
+    if (cityInput.value.trim() !== '') {
         updateWeatherInfo(cityInput.value)
         cityInput.value = ''
         cityInput.blur()
@@ -29,95 +85,110 @@ searchBtn.addEventListener('click', () => {
 })
 
 cityInput.addEventListener('keydown', (event) => {
-    if(event.key == 'Enter' && cityInput.value.trim() != '') {
+    if (event.key === 'Enter' && cityInput.value.trim() !== '') {
         updateWeatherInfo(cityInput.value)
         cityInput.value = ''
         cityInput.blur()
     }
 })
 
-async function getFetchData(endPoint, city){
-    try {
-        const apiUrl = `https://api.openweathermap.org/data/2.5/${endPoint}?q=${city}&appid=${apiKey}&units=metric`
-        const response = await fetch(apiUrl)
-        return response.json()
-    } catch (error) {
-        console.error('API Error:', error)
-        return { cod: 500 }
-    }
+// ===== API FETCH =====
+async function getFetchData(endPoint, city) {
+    const apiUrl = `https://api.openweathermap.org/data/2.5/${endPoint}?q=${city}&appid=${apiKey}&units=metric`
+    const response = await fetch(apiUrl)
+    return response.json()
 }
 
-function getweatherIconUrl(id) {
-    // Using free weather icons from OpenWeatherMap's CDN
-    if (id >= 200 && id <= 232) return 'https://openweathermap.org/img/wn/11d@2x.png'
-    if (id >= 300 && id <= 321) return 'https://openweathermap.org/img/wn/09d@2x.png'
-    if (id >= 500 && id <= 531) return 'https://openweathermap.org/img/wn/10d@2x.png'
-    if (id >= 600 && id <= 622) return 'https://openweathermap.org/img/wn/13d@2x.png'
-    if (id >= 700 && id <= 781) return 'https://openweathermap.org/img/wn/50d@2x.png'
-    if (id === 800) return 'https://openweathermap.org/img/wn/01d@2x.png'
-    if (id >= 801 && id <= 804) return 'https://openweathermap.org/img/wn/02d@2x.png'
-    return 'https://openweathermap.org/img/wn/03d@2x.png'
+// ===== WEATHER ICONS (PNG) =====
+function getWeatherIcon(id) {
+    if (id >= 200 && id <= 232) return 'thunderstorm.png'
+    if (id >= 300 && id <= 321) return 'drizzle.png'
+    if (id >= 500 && id <= 531) return 'rain.png'
+    if (id >= 600 && id <= 622) return 'snow.png'
+    if (id >= 700 && id <= 781) return 'atmosphere.png'
+    if (id === 800) return 'clear.png'
+    if (id >= 801 && id <= 804) return 'cloud.png'
+    return 'cloud.png'
 }
 
+// ===== DATE FORMATTER =====
 function getCurrentDate() {
     const currentDate = new Date()
-    const options = {
-        weekday: 'short',
-        day: '2-digit',
-        month: 'short',
-    }
+    const options = { weekday: 'short', day: '2-digit', month: 'short' }
     return currentDate.toLocaleDateString('en-GB', options)
 }
 
-async function updateWeatherInfo(city) {
-    // Show loading state (optional)
-    const weatherData = await getFetchData('weather', city)
-    
-    if(weatherData.cod !== 200) {
-        showDisplaySection(notFoundSection)
-        return
+// ===== LOADING STATE =====
+function showLoading() {
+    let overlay = mainContainer.querySelector('.loading-overlay')
+    if (!overlay) {
+        overlay = document.createElement('div')
+        overlay.className = 'loading-overlay'
+        overlay.innerHTML = '<div class="spinner"></div>'
+        mainContainer.style.position = 'relative'
+        mainContainer.appendChild(overlay)
     }
-    
-    const{
-        name: country,
-        main: { temp, humidity },
-        weather: [{ id, main }],
-        wind: { speed }
-    } = weatherData
-
-    countryTxt.textContent = country
-    tempTxt.textContent = Math.round(temp) + ' °C'
-    conditionTxt.textContent = main
-    humidityValueTxt.textContent = humidity + '%'
-    windValueTxt.textContent = speed + ' M/s'
-    
-    currentDateTxt.textContent = getCurrentDate()
-    
-    weatherSummaryImg.src = getweatherIconUrl(id)
-
-    await updateForecastsInfo(city)
-    showDisplaySection(weatherInfoSection)
 }
 
+function hideLoading() {
+    const overlay = mainContainer.querySelector('.loading-overlay')
+    if (overlay) overlay.remove()
+}
+
+// ===== UPDATE WEATHER =====
+async function updateWeatherInfo(city) {
+    showLoading()
+    try {
+        const weatherData = await getFetchData('weather', city)
+        if (parseInt(weatherData.cod) !== 200) {
+            hideLoading()
+            showDisplaySection(notFoundSection)
+            return
+        }
+
+        const {
+            name: country,
+            main: { temp, humidity, feels_like, pressure },
+            weather: [{ id, main }],
+            wind: { speed }
+        } = weatherData
+
+        countryTxt.textContent = country
+        tempTxt.textContent = Math.round(temp) + ' °C'
+        conditionTxt.textContent = main
+        humidityValueTxt.textContent = humidity + '%'
+        windValueTxt.textContent = speed + ' M/s'
+        feelsLikeValueTxt.textContent = Math.round(feels_like) + ' °C'
+        pressureValueTxt.textContent = pressure + ' hPa'
+        currentDateTxt.textContent = getCurrentDate()
+        weatherSummaryImg.src = `image/weather/${getWeatherIcon(id)}`
+
+        await updateForecastsInfo(city)
+        hideLoading()
+        showDisplaySection(weatherInfoSection)
+    } catch (error) {
+        console.error('Error fetching weather:', error)
+        hideLoading()
+        showDisplaySection(notFoundSection)
+    }
+}
+
+// ===== UPDATE FORECAST =====
 async function updateForecastsInfo(city) {
     const forecastsData = await getFetchData('forecast', city)
-    
-    if(forecastsData.cod !== 200) return
-    
     const timeTaken = '12:00:00'
     const todayDate = new Date().toISOString().split('T')[0]
-    
-    forecastItemsContainers.innerHTML = ''
-    
+    forecastItemsContainer.innerHTML = ''
+
     forecastsData.list.forEach(forecastWeather => {
         if (forecastWeather.dt_txt.includes(timeTaken) &&
             !forecastWeather.dt_txt.includes(todayDate)) {
-            updateForecastsItems(forecastWeather)
+            updateForecastItems(forecastWeather)
         }
     })
 }
 
-function updateForecastsItems(weatherData) {
+function updateForecastItems(weatherData) {
     const {
         dt_txt: date,
         weather: [{ id }],
@@ -125,26 +196,27 @@ function updateForecastsItems(weatherData) {
     } = weatherData
 
     const dateTaken = new Date(date)
-    const dateOption = {
-        day: '2-digit',
-        month: 'short'
-    }
+    const dateOption = { day: '2-digit', month: 'short' }
     const dateResult = dateTaken.toLocaleDateString('en-US', dateOption)
 
     const forecastItem = `
         <div class="forecast-item">
             <h5 class="forecast-item-date regular-txt">${dateResult}</h5>
-            <img src="${getweatherIconUrl(id)}" class="forecast-item-img" alt="Forecast weather icon">
+            <img src="image/weather/${getWeatherIcon(id)}" class="forecast-item-img" alt="Forecast">
             <h5 class="forecast-item-temp">${Math.round(temp)} °C</h5>
         </div>
     `
-
-    forecastItemsContainers.insertAdjacentHTML('beforeend', forecastItem)
+    forecastItemsContainer.insertAdjacentHTML('beforeend', forecastItem)
 }
 
+// ===== SHOW/HIDE SECTIONS =====
 function showDisplaySection(section) {
     [weatherInfoSection, searchCitySection, notFoundSection]
         .forEach(sec => sec.style.display = 'none')
+    section.style.display = 'block'
 
-    section.style.display = 'flex'
+    // Re-trigger animations
+    section.style.animation = 'none'
+    section.offsetHeight // reflow
+    section.style.animation = ''
 }
