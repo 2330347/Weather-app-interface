@@ -17,6 +17,9 @@ const forecastItemsContainers = document.querySelector('.forecast-items-containe
 
 const apiKey = 'c63c398699d8b78634249ca219532690'
 
+// Show search section by default
+showDisplaySection(searchCitySection)
+
 searchBtn.addEventListener('click', () => {
     if (cityInput.value.trim() != '') {
         updateWeatherInfo(cityInput.value)
@@ -34,9 +37,14 @@ cityInput.addEventListener('keydown', (event) => {
 })
 
 async function getFetchData(endPoint, city){
-    const apiUrl = `https://api.openweathermap.org/data/2.5/${endPoint}?q=${city}&appid=${apiKey}&units=metric`
-    const response = await fetch(apiUrl)
-    return response.json()
+    try {
+        const apiUrl = `https://api.openweathermap.org/data/2.5/${endPoint}?q=${city}&appid=${apiKey}&units=metric`
+        const response = await fetch(apiUrl)
+        return response.json()
+    } catch (error) {
+        console.error('API Error:', error)
+        return { cod: 500 }
+    }
 }
 
 function getweatherIconUrl(id) {
@@ -62,9 +70,10 @@ function getCurrentDate() {
 }
 
 async function updateWeatherInfo(city) {
+    // Show loading state (optional)
     const weatherData = await getFetchData('weather', city)
     
-    if(parseInt(weatherData.cod) !== 200) {
+    if(weatherData.cod !== 200) {
         showDisplaySection(notFoundSection)
         return
     }
@@ -92,10 +101,14 @@ async function updateWeatherInfo(city) {
 
 async function updateForecastsInfo(city) {
     const forecastsData = await getFetchData('forecast', city)
+    
+    if(forecastsData.cod !== 200) return
+    
     const timeTaken = '12:00:00'
     const todayDate = new Date().toISOString().split('T')[0]
     
     forecastItemsContainers.innerHTML = ''
+    
     forecastsData.list.forEach(forecastWeather => {
         if (forecastWeather.dt_txt.includes(timeTaken) &&
             !forecastWeather.dt_txt.includes(todayDate)) {
@@ -133,5 +146,5 @@ function showDisplaySection(section) {
     [weatherInfoSection, searchCitySection, notFoundSection]
         .forEach(sec => sec.style.display = 'none')
 
-    section.style.display = 'block'
+    section.style.display = 'flex'
 }
