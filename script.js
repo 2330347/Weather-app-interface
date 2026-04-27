@@ -14,8 +14,6 @@ const weatherSummaryImg = document.querySelector('.weather-summary-img')
 const currentDateTxt = document.querySelector('.current-date-txt')
 
 const forecastItemsContainers = document.querySelector('.forecast-items-containers')
-console.log("Forecast container:", forecastItemsContainers)
-
 
 const apiKey = 'c63c398699d8b78634249ca219532690'
 
@@ -26,10 +24,9 @@ searchBtn.addEventListener('click', () => {
         cityInput.blur()
     }
 })
+
 cityInput.addEventListener('keydown', (event) => {
-    if(event.key == 'Enter' &&
-        cityInput.value.trim() != ''
-    ) {
+    if(event.key == 'Enter' && cityInput.value.trim() != '') {
         updateWeatherInfo(cityInput.value)
         cityInput.value = ''
         cityInput.blur()
@@ -37,23 +34,21 @@ cityInput.addEventListener('keydown', (event) => {
 })
 
 async function getFetchData(endPoint, city){
-        const apiUrl = `https://api.openweathermap.org/data/2.5/${endPoint}?q=${city}&appid=${apiKey}&units=metric`
-
-
+    const apiUrl = `https://api.openweathermap.org/data/2.5/${endPoint}?q=${city}&appid=${apiKey}&units=metric`
     const response = await fetch(apiUrl)
-
     return response.json()
 }
 
-function getweatherIcon(id) {
-    if (id >= 200 && id <= 232) return 'thunderstorm.svg'
-    if (id >= 300 && id <= 321) return 'drizzle.svg'
-    if (id >= 500 && id <= 531) return 'rain.svg'
-    if (id >= 600 && id <= 622) return 'snow.svg'
-    if (id >= 700 && id <= 781) return 'atmosphere.svg'
-    if (id === 800) return 'clear.svg'
-    if (id >= 801 && id <= 804) return 'cloud.svg'
-    return 'unknown.svg'
+function getweatherIconUrl(id) {
+    // Using free weather icons from OpenWeatherMap's CDN
+    if (id >= 200 && id <= 232) return 'https://openweathermap.org/img/wn/11d@2x.png'
+    if (id >= 300 && id <= 321) return 'https://openweathermap.org/img/wn/09d@2x.png'
+    if (id >= 500 && id <= 531) return 'https://openweathermap.org/img/wn/10d@2x.png'
+    if (id >= 600 && id <= 622) return 'https://openweathermap.org/img/wn/13d@2x.png'
+    if (id >= 700 && id <= 781) return 'https://openweathermap.org/img/wn/50d@2x.png'
+    if (id === 800) return 'https://openweathermap.org/img/wn/01d@2x.png'
+    if (id >= 801 && id <= 804) return 'https://openweathermap.org/img/wn/02d@2x.png'
+    return 'https://openweathermap.org/img/wn/03d@2x.png'
 }
 
 function getCurrentDate() {
@@ -66,17 +61,14 @@ function getCurrentDate() {
     return currentDate.toLocaleDateString('en-GB', options)
 }
 
-
 async function updateWeatherInfo(city) {
     const weatherData = await getFetchData('weather', city)
-    console.log("Weather data:", weatherData)
+    
     if(parseInt(weatherData.cod) !== 200) {
-        console.log("City not found. Showing Not Found section.")
         showDisplaySection(notFoundSection)
         return
     }
-    console.log("City found. Showing weather info.")
-
+    
     const{
         name: country,
         main: { temp, humidity },
@@ -92,8 +84,7 @@ async function updateWeatherInfo(city) {
     
     currentDateTxt.textContent = getCurrentDate()
     
-    console.log("Image Element:", weatherSummaryImg) 
-    weatherSummaryImg.src = `image/weather/${getweatherIcon(id)}`
+    weatherSummaryImg.src = getweatherIconUrl(id)
 
     await updateForecastsInfo(city)
     showDisplaySection(weatherInfoSection)
@@ -101,7 +92,6 @@ async function updateWeatherInfo(city) {
 
 async function updateForecastsInfo(city) {
     const forecastsData = await getFetchData('forecast', city)
-
     const timeTaken = '12:00:00'
     const todayDate = new Date().toISOString().split('T')[0]
     
@@ -115,7 +105,6 @@ async function updateForecastsInfo(city) {
 }
 
 function updateForecastsItems(weatherData) {
-    console.log(weatherData)
     const {
         dt_txt: date,
         weather: [{ id }],
@@ -132,7 +121,7 @@ function updateForecastsItems(weatherData) {
     const forecastItem = `
         <div class="forecast-item">
             <h5 class="forecast-item-date regular-txt">${dateResult}</h5>
-            <img src="image/weather/${getweatherIcon(id)}" class="forecast-item-img">
+            <img src="${getweatherIconUrl(id)}" class="forecast-item-img" alt="Forecast weather icon">
             <h5 class="forecast-item-temp">${Math.round(temp)} °C</h5>
         </div>
     `
@@ -146,4 +135,3 @@ function showDisplaySection(section) {
 
     section.style.display = 'block'
 }
-
