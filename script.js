@@ -161,7 +161,7 @@ async function updateWeatherInfo(city) {
         feelsLikeValueTxt.textContent = Math.round(feels_like) + ' °C'
         pressureValueTxt.textContent = pressure + ' hPa'
         currentDateTxt.textContent = getCurrentDate()
-        weatherSummaryImg.src = `image/weather/${getWeatherIcon(id)}`
+        weatherSummaryImg.src = `image/${getWeatherIcon(id)}`
 
         await updateForecastsInfo(city)
         hideLoading()
@@ -202,7 +202,7 @@ function updateForecastItems(weatherData) {
     const forecastItem = `
         <div class="forecast-item">
             <h5 class="forecast-item-date regular-txt">${dateResult}</h5>
-            <img src="image/weather/${getWeatherIcon(id)}" class="forecast-item-img" alt="Forecast">
+            <img src="image/${getWeatherIcon(id)}" class="forecast-item-img" alt="Forecast">
             <h5 class="forecast-item-temp">${Math.round(temp)} °C</h5>
         </div>
     `
