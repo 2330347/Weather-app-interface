@@ -5,7 +5,7 @@ A beautiful, minimal, and fully functional Weather App built with **HTML**, **CS
 ## 🔥 Live Preview
 
 ### 🔍 Search Screen
-[https://github.com/2330347/Weather-app-interface/blob/main/image/discover.png?raw=true](https://github.com/2330347/Weather-app-interface/blob/main/image/discover.png?raw=true)
+[[https://github.com/2330347/Weather-app-interface/blob/main/image/discover.png?raw=true](https://github.com/2330347/Weather-app-interface/blob/main/image/discover.png?raw=true)]
 
 
 ### 🌤️ Weather Info Display
