@@ -10,7 +10,7 @@ A beautiful, minimal, and fully functional Weather App built with **HTML**, **CS
 
 
 ### 🌤️ Weather Info Display
-![Screenshot 2025-06-15 011410](https://github.com/user-attachments/assets/3be4ca6b-69b2-4b21-aa43-8132041fb077)
+![Weather Info Display](https://github.com/2330347/Weather-app-interface/blob/main/image/search_city.png?raw=true)
 
 
 ---
